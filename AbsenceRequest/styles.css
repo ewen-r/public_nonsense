@@ -16,17 +16,9 @@
   margin: 0 auto;
 }
 
-.header::before {
-  content: "";
-  display: block;
-  width: 200px;
-  height: 50px;
-  margin: auto;
+.logo {
+  text-align: center;
   margin-bottom: 20px;
-  background-image: url("https://raw.githubusercontent.com/ewen-r/public_nonsense/fceff239f45b962f3a4f64da5f0f6cb809f9a403/AbsenceRequest/logo.png");
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: contain;
 }
 
 .intro {
