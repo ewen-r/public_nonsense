@@ -28,11 +28,11 @@
   display: block;
 }
 
-.intro::after {
-  content: '';
+.signature {
+  text-align: center;
+  font-size: 16px;
+  margin-bottom: 20px;
   display: block;
-  border-bottom: 2px solid black;
-  margin: 40px 0;
 }
 
 h1 {
@@ -46,8 +46,4 @@ h4,
 h5 {
   font-size: 16px;
   margin-bottom: 20px;
-}
-
-p {
-  text-align: left;
 }
