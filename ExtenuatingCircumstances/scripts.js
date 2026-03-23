@@ -23,17 +23,6 @@ document.addEventListener("DOMContentLoaded", function () {
   function validateForm() {
     const isValid = requiredFields.every(fieldId => {
       const field = document.getElementById(fieldId);
-      if (fieldId === "coursecodes") {
-        return $("#coursecodes").val() && $("#coursecodes").val().length > 0;
-      }
-      if (fieldId === "assessmentType") {
-        return (
-          $("#assessmentType").val() && $("#assessmentType").val().length != 1
-        );
-      }
-      if (fieldId === "days") {
-        return field.value && field.value !== "" && !field.value.includes("⚠️");
-      }
       return field.value.trim() !== "";
     });
     submitButton.disabled = !isValid;
@@ -52,7 +41,7 @@ document.addEventListener("DOMContentLoaded", function () {
     "lastname",
     "studentid",
     "email",
-    "coursecodes",
+    "coursecode",
     "assessmentType",
     "assessmentDate",
     "reason"
@@ -61,8 +50,8 @@ document.addEventListener("DOMContentLoaded", function () {
   // Add listeners to all required fields
   requiredFields.forEach(fieldId => {
     const field = document.getElementById(fieldId);
-    if (fieldId === "coursecodes") {
-      $("#coursecodes").on("changed.bs.select", validateForm);
+    if (fieldId === "coursecode") {
+      $("#coursecode").on("changed.bs.select", validateForm);
     } else if (fieldId === "assessmentType") {
       $("#assessmentType").on("changed.bs.select", validateForm);
     } else {
@@ -101,13 +90,12 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     }
 
-    const selectedModules = $("#coursecodes").val() || [];
     const formData = {
       studentid: form.studentid.value,
       firstname: form.firstname.value,
       lastname: form.lastname.value,
       email: form.email.value,
-      coursecodes: selectedModules,
+      coursecode: form.coursecode.value,
       assessmentType: form.assessmentType.value,
       assessmentDate: form.assessmentDate.value,
       reason: form.reason.value,
