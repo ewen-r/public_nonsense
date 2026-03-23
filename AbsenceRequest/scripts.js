@@ -26,9 +26,6 @@ document.addEventListener("DOMContentLoaded", function () {
       if (fieldId === "coursecodes") {
         return $("#coursecodes").val() && $("#coursecodes").val().length > 0;
       }
-      if (fieldId === "assessmentType") {
-        return $("#assessmentType").val() && $("#assessmentType").val().length != 1;
-      }
       if (fieldId === "days") {
         return field.value && field.value !== "" && !field.value.includes("⚠️");
       }
@@ -37,22 +34,44 @@ document.addEventListener("DOMContentLoaded", function () {
     submitButton.disabled = !isValid;
   }
 
+  function calculateAbsenceDays() {
+    const startDate = new Date(document.getElementById("startdate").value);
+    const endDate = new Date(document.getElementById("enddate").value);
+    const absenceDaysField = document.getElementById("days");
+    if (!isNaN(startDate) && !isNaN(endDate)) {
+      if (endDate < startDate) {
+        absenceDaysField.value = "⚠️ Invalid range";
+        return null;
+      }
+      let count = 0;
+      let current = new Date(startDate);
+      while (current <= endDate) {
+        const day = current.getDay();
+        if (day !== 0 && day !== 6) count++;
+        current.setDate(current.getDate() + 1);
+      }
+      absenceDaysField.value = count;
+      return count;
+    }
+    absenceDaysField.value = "";
+    return null;
+  }
+
   // Transform the basic HTML <select> element (the coursecode dropdown) into a Bootstrap Select
   //     adding styling and enhancements such as search functionality
   $(document).ready(function () {
     $(".selectpicker").selectpicker();
   });
 
-  const form = document.getElementById("Form");
+  const form = document.getElementById("AbsenceForm");
   const submitButton = document.querySelector('button[type="submit"]');
   const requiredFields = [
     "firstname",
     "lastname",
     "studentid",
     "email",
+    "days",
     "coursecodes",
-    'assessmentType',
-    "assessmentDate",
     "reason"
   ];
 
@@ -61,15 +80,18 @@ document.addEventListener("DOMContentLoaded", function () {
     const field = document.getElementById(fieldId);
     if (fieldId === "coursecodes") {
       $("#coursecodes").on("changed.bs.select", validateForm);
-    }
-    else if (fieldId === "assessmentType") {
-      $("#assessmentType").on("changed.bs.select", validateForm);
-    }
-    else {
+    } else {
       field.addEventListener("input", validateForm);
       field.addEventListener("change", validateForm);
     }
   });
+  // Add listeners to date fields to calculate absence days
+  document
+    .getElementById("startdate")
+    .addEventListener("change", calculateAbsenceDays);
+  document
+    .getElementById("enddate")
+    .addEventListener("change", calculateAbsenceDays);
 
   // Add listener for Submit button.
   form.addEventListener("submit", async function (event) {
@@ -81,6 +103,15 @@ document.addEventListener("DOMContentLoaded", function () {
     if (reason === "Other (details as below)" && comments === "") {
       showAlert(
         "Please provide additional comments/details for your selected reason.",
+        "danger"
+      );
+      return;
+    }
+
+    const days = calculateAbsenceDays();
+    if (days === null) {
+      showAlert(
+        "Please correct the absence dates before submitting.",
         "danger"
       );
       return;
@@ -107,16 +138,17 @@ document.addEventListener("DOMContentLoaded", function () {
       firstname: form.firstname.value,
       lastname: form.lastname.value,
       email: form.email.value,
-      coursecodes: selectedModules,
-      assessmentType: form.assessmentType.value,
-      assessmentDate: form.assessmentDate.value,
+      startdate: form.startdate.value,
+      enddate: form.enddate.value,
+      days: days.toString(),
       reason: form.reason.value,
+      coursecodes: selectedModules,
       comments: form.comments.value,
       attachments: attachmentsBase64
     };
 
     try {
-      // TODO_EWEN: Add link to [FLOW] ECF 2 -Process Form
+      // TODO_EWEN: Add link to [FLOW] AFR 2 -Process Form
       const handlerUrl =
         "https://5ba17b8c45b4e82f9ee71eecf21efa.46.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/3118e79aab2740cb915f45b1ab0443ca/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=Ks6H39UckFsa4tSfc65VQcokHYwsYGN8UZdOIWpx7sA";
       // POST Form data to Power Automate handler
